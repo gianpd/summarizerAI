@@ -17,6 +17,7 @@ TORTOISE_ORM = {
     },
 }
 
+
 def init_db(app: FastAPI) -> None:
     register_tortoise(
         app,
@@ -25,6 +26,7 @@ def init_db(app: FastAPI) -> None:
         generate_schemas=False,
         add_exception_handlers=True,
     )
+
 
 async def generate_schema() -> None:
     logger.info("Initializing Tortoise ...")
