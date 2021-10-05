@@ -59,8 +59,7 @@ jobs:
             --name fastapi-tdd \
             -e PORT=8765 \
             -e ENVIRONMENT=dev \
-            -e DATABASE_TEST_URL=sqlite://sqlite.db \
-            -p 5003:8765 \
+            -e DATABASE_TEST_URL=postgres://postgres:postgres@web-db:5432/web_test
             ${{ env.IMAGE }}:latest
       - name: Pytest
         run: docker exec fastapi-tdd python -m pytest .
