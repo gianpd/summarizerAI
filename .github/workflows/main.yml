@@ -62,13 +62,11 @@ jobs:
             -e DATABASE_TEST_URL=sqlite://sqlite.db \
             -p 5003:8765 \
             ${{ env.IMAGE }}:latest
-      - name: Install requirements
-        run: docker exec fastapi-tdd pip install black==21.6b0 flake8==3.9.2 isort==5.9.1 pytest==6.2.4
       - name: Pytest
         run: docker exec fastapi-tdd python -m pytest .
-      - name: Flake8
-        run: docker exec fastapi-tdd python -m flake8 .
-      - name: Black
-        run: docker exec fastapi-tdd python -m black . --check
-      - name: isort
-        run: docker exec fastapi-tdd python -m isort . --check-only
+      #- name: Flake8
+      #  run: docker exec fastapi-tdd python -m flake8 .
+     #- name: Black
+     #  run: docker exec fastapi-tdd python -m black . --check
+     #- name: isort
+     #  run: docker exec fastapi-tdd python -m isort . --check-only
