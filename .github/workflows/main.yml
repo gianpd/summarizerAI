@@ -65,7 +65,7 @@ jobs:
             ${{ env.IMAGE }}:latest
       - name: Logs
         run: |
-          echo $(env.IMAGE)
+          env
     #  - name: Install requirements
     #    run: docker exec fastapi-tdd pip install pytest
     #  - name: Pytest
