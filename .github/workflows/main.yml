@@ -66,8 +66,8 @@ jobs:
       - name: Logs
         run: |
           env
-      - name: Pytest
-        run: docker exec fastapi-tdd python -m pytest tests
+     #- name: Pytest
+     #  run: docker exec fastapi-tdd python -m pytest tests
      # - name: Flake8
      #  run: docker exec fastapi-tdd python -m flake8 .
      #- name: Black
