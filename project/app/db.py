@@ -1,10 +1,13 @@
 import logging
 import os
+import sys
 
 from fastapi import FastAPI
 from tortoise import Tortoise, run_async
 from tortoise.contrib.fastapi import register_tortoise
 
+logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
+                level=logging.INFO, datefmt=None)
 logger = logging.getLogger("uvicorn")
 
 TORTOISE_ORM = {

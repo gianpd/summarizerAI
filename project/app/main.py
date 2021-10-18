@@ -1,3 +1,4 @@
+import sys
 import logging
 
 from fastapi import FastAPI
@@ -5,6 +6,8 @@ from fastapi import FastAPI
 from app.api import ping, summaries
 from app.db import init_db
 
+logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
+                level=logging.INFO, datefmt=None)
 logger = logging.getLogger("uvicorn")
 
 
