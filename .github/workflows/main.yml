@@ -1,9 +1,7 @@
 name: Continuous Integration and Delivery
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  push
 
 env:
   IMAGE: docker.pkg.github.com/$(echo $GITHUB_REPOSITORY | tr '[A-Z]' '[a-z]')/summarize
@@ -65,10 +63,10 @@ jobs:
             -e DATABASE_TEST_URL=sqlite://sqlite.db \
             -p 5003:8765 \
             ${{ env.IMAGE }}:latest
-      - name: Pytest
-        run: docker exec fastapi-tdd python -m pytest ./tests
-      #- name: Flake8
-      #  run: docker exec fastapi-tdd python -m flake8 .
+      #- name: Pytest
+      #  run: docker exec fastapi-tdd python -m pytest ./tests
+      - name: Flake8
+        run: docker exec fastapi-tdd python -m flake8 .
      #- name: Black
      #  run: docker exec fastapi-tdd python -m black . --check
      #- name: isort
