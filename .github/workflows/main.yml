@@ -54,8 +54,8 @@ jobs:
             --file ./project/Dockerfile.prod \
             "./project"
       - name: Run container
-      run: |
-        docker-compose up -d --build
+        run: |
+          docker-compose up -d --build
       #  run: |
       #    docker run \
       #      -d \
