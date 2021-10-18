@@ -4,7 +4,7 @@ on:
   push
 
 env:
-  IMAGE: docker.pkg.github.com/$(echo $GITHUB_REPOSITORY | tr '[A-Z]' '[a-z]')/summarize
+  IMAGE: docker.pkg.github.com/$(echo $GITHUB_REPOSITORY | tr '[A-Z]' '[a-z]')/summarizer
 
 jobs:
 
@@ -66,10 +66,8 @@ jobs:
       - name: Logs
         run: |
           env
-    #  - name: Install requirements
-    #    run: docker exec fastapi-tdd pip install pytest
-    #  - name: Pytest
-    #    run: docker exec fastapi-tdd pytest tests
+      - name: Pytest
+        run: docker exec fastapi-tdd python -m pytest tests
      # - name: Flake8
      #  run: docker exec fastapi-tdd python -m flake8 .
      #- name: Black
