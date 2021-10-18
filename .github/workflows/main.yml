@@ -55,18 +55,18 @@ jobs:
             "./project"
       - name: Run container
         run: |
-          docker-compose up -d --build
-      #  run: |
-      #    docker run \
-      #      -d \
-      #      --name fastapi-tdd \
-      #      -e PORT=8765 \
-      #      -e ENVIRONMENT=dev \
-      #      -e DATABASE_TEST_URL=sqlite://sqlite.db \
-      #      -p 5003:8765 \
-      #      ${{ env.IMAGE }}:latest
+          docker run \
+            -d \
+            --name fastapi-tdd \
+            -e PORT=8765 \
+            -e ENVIRONMENT=dev \
+            -e DATABASE_TEST_URL=sqlite://sqlite.db \
+            -p 5003:8765 \
+            ${{ env.IMAGE }}:latest
+      - name: Install requirements
+        run: docker exec fastapi-tdd pip install pytest
       - name: Pytest
-        run: docker-compose exec web python -m pytest ./tests
+        run: docker exec fastapi-tdd pytest tests
      # - name: Flake8
      #  run: docker exec fastapi-tdd python -m flake8 .
      #- name: Black
