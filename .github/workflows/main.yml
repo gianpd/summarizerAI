@@ -3,7 +3,7 @@ name: Continuous Integration and Delivery
 on: [push]
 
 env:
-  IMAGE: docker.pkg.github.com/$(echo $GITHUB_REPOSITORY | tr '[A-Z]' '[a-z]')/summarizer
+  IMAGE: docker.pkg.github.com/$(echo $GITHUB_REPOSITORY | tr '[A-Z]' '[a-z]')/summarize
 
 jobs:
 
@@ -63,7 +63,7 @@ jobs:
             -p 5003:8765 \
             ${{ env.IMAGE }}:latest
       - name: Pytest
-        run: docker exec fastapi-tdd python -m pytest .
+        run: docker exec fastapi-tdd python -m pytest ./tests
       #- name: Flake8
       #  run: docker exec fastapi-tdd python -m flake8 .
      #- name: Black
