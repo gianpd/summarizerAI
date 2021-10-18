@@ -82,12 +82,11 @@ def test_update_summary(test_app_with_db):
     )
 
     summary_id = response.json()['id']
-
     response = test_app_with_db.put(
-        "/summaries/{summary_id}", 
+        f"/summaries/{summary_id}/", 
         data=json.dumps({"url": "https://foo.bar", "summary": "updated!"})
     )
-    print(response)
+
     assert response.status_code == 200
 
     response_dict = response.json()
@@ -99,7 +98,7 @@ def test_update_summary(test_app_with_db):
 
 def test_update_summary_incorrect_id(test_app_with_db):
     response = test_app_with_db.put(
-        "/summaries/9090", data=json.dumps({"url": "https://foo.bar", "summary": "updated!"})
+        "/summaries/9090/", data=json.dumps({"url": "https://foo.bar", "summary": "updated!"})
     )
     
     assert response.status_code == 404
@@ -113,7 +112,7 @@ def test_update_summary_incorrect_json(test_app_with_db):
 
     summary_id = response.json()['id']
     response = test_app_with_db.put(
-        "/summaries/{summary_id}", data=json.dumps({})
+        f"/summaries/{summary_id}/", data=json.dumps({})
     )
 
     assert response.status_code == 422
