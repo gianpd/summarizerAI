@@ -2,3 +2,6 @@ __pycache__
 venv
 htmlcov
 .coverage*
+.pytest_cache/
+aerich.ini/
+setup.cfg/
