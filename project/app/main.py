@@ -8,7 +8,7 @@ from app.db import init_db
 
 logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
                 level=logging.INFO, datefmt=None)
-logger = logging.getLogger("uvicorn")
+logger = logging.getLogger("SummarizerMain")
 
 
 def create_application() -> FastAPI:

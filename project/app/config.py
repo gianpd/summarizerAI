@@ -11,9 +11,11 @@ class Settings(BaseSettings):
     environment: str = os.getenv("ENVIRONMENT", "dev")
     testing: bool = os.getenv("TESTING", 0)
     database_url: AnyUrl = os.getenv("DATABASE_URL")
+    hf_token: str = os.getenv("HF_TOKEN")
 
 
 @lru_cache
 def get_settings() -> BaseSettings:
     log.info("Loading config settings from the environment ...")
     return Settings()
+

@@ -5,3 +5,4 @@ htmlcov
 .pytest_cache/
 aerich.ini/
 setup.cfg/
+*.env

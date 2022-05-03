@@ -5,8 +5,8 @@
 ![Continuous Integration and Delivery](https://github.com/gianpDomiziani/summarizerWPA/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=master)
 
 ### Setup
-1. docker-compose up -d --build
-2. docker-compose logs web
+1. docker-compose --env-file FILE_NAME.env up -d --build
+2. docker-compose logs web -f
 
 ### DB setup
 Go inside the web-db running container and use the postgres CLI:
