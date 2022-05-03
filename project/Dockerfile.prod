@@ -4,7 +4,7 @@ FROM python:3.10.4-slim-buster
 # create directory for the app user
 RUN mkdir -p /home/app
 
-# create the app user
+# create the app user (not root user as recommended)
 RUN addgroup --system app && adduser --system --group app
 
 # create the appropriate directories

@@ -1,10 +1,13 @@
-import logging
 import os
+import sys
 from functools import lru_cache
 
 from pydantic import AnyUrl, BaseSettings
 
-log = logging.getLogger("uvicorn")
+import logging
+logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
+                level=logging.INFO, datefmt=None)
+logger = logging.getLogger("Summarizer")
 
 
 class Settings(BaseSettings):
@@ -14,8 +17,9 @@ class Settings(BaseSettings):
     hf_token: str = os.getenv("HF_TOKEN")
 
 
+# lru_cache: save the setting values in memory avoiding to re-download they for each request.
 @lru_cache
 def get_settings() -> BaseSettings:
-    log.info("Loading config settings from the environment ...")
+    logger.info("Loading config settings from the environment ...")
     return Settings()
 
