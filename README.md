@@ -1,8 +1,4 @@
-# SummarizerWPA with Bart Large CNN 🏻 🤟🏼
-
-**FastApi**
-
-![Continuous Integration and Delivery](https://github.com/gianpDomiziani/summarizerWPA/workflows/Continuous%20Integration%20and%20Delivery/badge.svg?branch=master)
+# SummarizerPWA with Bart Large CNN ⚡️🔥🚀
 
 ### Setup
 1. docker-compose --env-file FILE_NAME.env up -d --build
