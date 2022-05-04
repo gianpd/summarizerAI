@@ -27,9 +27,10 @@ async def create_summary(
     logger.info('Creating new summary ...')
     summary_id = await crud.post(payload)
     logger.info(f'New summary id {summary_id} created')
-    background_tasks.add_task(generate_summary, summary_id, payload.url)
     response_object = {"id": summary_id, "url": payload.url}
-    logger.debug(f'returning response: {response_object}')
+    logger.info('Calling AI summary inference ...')
+    logger.debug(f'Summary id / summary url: {response_object}')
+    background_tasks.add_task(generate_summary, summary_id, payload.url)
     return
 
 
@@ -37,9 +38,9 @@ async def create_summary(
 async def read_summary(id: int = Path(..., gt=0)) -> SummarySchema:
     logger.info(f'Trying to get the summary {id}')
     summary = await crud.get(id)
-    logger.info(f'summary: {summary}')
     if not summary:
         raise HTTPException(status_code=404, detail="Summary not found")
+    logger.info(f'returning response: {summary}')
     return summary
 
 

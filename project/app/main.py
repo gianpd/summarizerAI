@@ -2,6 +2,7 @@ import sys
 import logging
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import ping, summaries
 from app.db import init_db
@@ -22,6 +23,16 @@ def create_application() -> FastAPI:
 
 app = create_application()
 
+origins = [
+    'http://localhost:3000' # testing the frontend
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def startup_event():

@@ -39,7 +39,7 @@ async def generate_summary(summary_id: int, url: str):
     response = requests.request("POST", API_URL, headers=headers, data=data)
     summary = json.loads(response.content.decode("utf-8"))
     summary = summary[0]['summary_text']
-    logger.info(f'Summary: {summary}')
+    logger.info(f'Updating id summary {summary_id} with summary: {summary}')
     await TextSummary.filter(id=summary_id).update(summary=summary)
 
 

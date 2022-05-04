@@ -6,3 +6,4 @@ htmlcov
 aerich.ini/
 setup.cfg/
 *.env
+frontend/
