@@ -3,12 +3,13 @@ import json
 import requests
 
 from typing import Text
+
 from newspaper import Article
 # from transformers import pipeline
 from app.models.tortoise import TextSummary
 from app.models.pydantic import SummaryPayloadSchema
 from app.config import get_settings
-
+from app.summarizer_pipeline import get_nest_sentences, load_tokenizer
 
 Config = get_settings()
 
@@ -32,33 +33,22 @@ def get_hf_inference_data_input(article_text):
     data = json.dumps(payload)
     return data
 
-
 async def generate_summary(summary_id: int, url: str):
+    summaries = []
     article = download_text(url)
-    data = get_hf_inference_data_input(article.text)
-    response = requests.request("POST", API_URL, headers=headers, data=data)
-    summary = json.loads(response.content.decode("utf-8"))
-    summary = summary[0]['summary_text']
-    logger.info(f'Updating id summary {summary_id} with summary: {summary}')
-    await TextSummary.filter(id=summary_id).update(summary=summary)
-
-
-
-# async def generate_summary(summary_id: int, url: str) -> None:
-#     summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-#     max_length = 160
-#     # newspaper download article
-#     article = Article(url)
-#     article.download()
-#     article.parse()
-#     # check length
-#     text = article.text
-#     length = len(text)
-#     logging.info(f'Summarizing text with lenght: {length}')
-#     if length > 2800:
-#         text = article.text[:2800]
-#         max_length = 360
-#     logging.info(f'Summarizing text to one with max_length: {max_length}')
-#     summary = summarizer(text, max_length=max_length, min_length=30, do_sample=False)
-#     summary = summary[0]['summary_text']
-#     await TextSummary.filter(id=summary_id).update(summary=summary)
+    # get text chunks where each chunk has 1024 tokens
+    text_chunks = get_nest_sentences(article.text, load_tokenizer())
+    for i, str_chunk in enumerate(text_chunks):
+        data = get_hf_inference_data_input(str_chunk)
+        response = requests.request("POST", API_URL, headers=headers, data=data)
+        try:
+            summary = json.loads(response.content.decode("utf-8"))
+        except json.JSONDecodeError as e:
+            logger.error(e)
+            continue
+        summary = summary[0]['summary_text']
+        logger.info(f'summary {i}: {summary}')
+        summaries.append(summary)
+    total_summary = ''.join(summaries)
+    logger.info(f'Total summary: {total_summary}')
+    await TextSummary.filter(id=summary_id).update(summary=total_summary)

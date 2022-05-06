@@ -20,7 +20,6 @@ from app.models.pydantic import (  # isort:skip
 
 router = APIRouter()
 
-
 @router.post("/", response_model=SummaryResponseSchema, status_code=201)
 async def create_summary(
     payload: SummaryPayloadSchema, background_tasks: BackgroundTasks) -> SummaryResponseSchema:
