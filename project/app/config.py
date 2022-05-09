@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     database_url: AnyUrl = os.getenv("DATABASE_URL")
     hf_token: str = os.getenv("HF_TOKEN")
     CANDIDATE_LABELS: list = candidate_labels
+    keyword_th: float = .55
 
 
 # lru_cache: save the setting values in memory avoiding to re-download they for each request.

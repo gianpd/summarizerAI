@@ -15,6 +15,7 @@ from app.summarizer_pipeline import get_nest_sentences, load_tokenizer
 
 Config = get_settings()
 CANDIDATE_LABELS = Config.CANDIDATE_LABELS
+KEYWORD_TH = Config.keyword_th
 
 import logging
 logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
@@ -63,13 +64,12 @@ async def generate_summary(summary_id: int, url: str):
     await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
 
 def generate_keys(summary: str):
-    th = .55
     classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
     preds = classifier(summary, CANDIDATE_LABELS, multi_label=True)
     labels, scores = preds['labels'], preds['scores']
     logger.info(f'Keywords labels predicted: {labels}')
     top5 = labels[:5]
-    top = [x for i, x in enumerate(top5) if scores[i] > th]
-    logger.info(f'Top keywords with score greather than {th}: {top}')
+    top = [x for i, x in enumerate(top5) if scores[i] > KEYWORD_TH]
+    logger.info(f'Top keywords with score greather than {KEYWORD_TH}: {top}')
     return top if len(top) else ''
 
