@@ -38,4 +38,7 @@ def get_nest_sentences(document: str, tokenizer: AutoTokenizer, token_max_length
             sents.append(s)
             s = sentence.text
             length = 0
+    # append last string with less # of tokens than token_max_length
+    sents.append(s)
+    logger.info(f'Returning {len(sents)} number of chunk strings')
     return sents
