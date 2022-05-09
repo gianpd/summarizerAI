@@ -36,6 +36,7 @@ def get_hf_inference_data_input(article_text):
 async def generate_summary(summary_id: int, url: str):
     summaries = []
     article = download_text(url)
+    logger.info(f'Retrived url text: {article.text}')
     # get text chunks where each chunk has 1024 tokens
     text_chunks = get_nest_sentences(article.text, load_tokenizer())
     for i, str_chunk in enumerate(text_chunks):
