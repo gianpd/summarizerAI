@@ -2,6 +2,7 @@
 from typing import List, Union
 from app.models.pydantic import SummaryPayloadSchema, SummaryUpdatePayloadSchema
 from app.models.tortoise import TextSummary
+from tortoise.query_utils import Prefetch
 
 
 async def post(payload: SummaryPayloadSchema) -> int:
@@ -12,6 +13,12 @@ async def post(payload: SummaryPayloadSchema) -> int:
 
 async def get(id: int) -> Union[dict, None]:
     summary = await TextSummary.filter(id=id).first().values()
+    if summary:
+        return summary
+    return None
+
+async def search_key(key: str) -> Union[dict, None]:
+    summary = await TextSummary.filter(keyTop=key).all().values()
     if summary:
         return summary
     return None

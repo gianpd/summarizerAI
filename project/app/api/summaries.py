@@ -33,6 +33,16 @@ async def create_summary(
     return
 
 
+@router.get("/keyword/{key}/", response_model=List[SummarySchema])
+async def read_summary_by_key(key: str) -> List[SummarySchema]:
+    logger.info(f'Searching for summary with keyword {key}')
+    summary = await crud.search_key(key)
+    if not summary:
+        raise HTTPException(status_code=404, detail=f"Summary not found with keyword {key}")
+    logger.info(f'returning response: {summary}')
+    return summary
+
+
 @router.get("/{id}/", response_model=SummarySchema)
 async def read_summary(id: int = Path(..., gt=0)) -> SummarySchema:
     logger.info(f'Trying to get the summary {id}')

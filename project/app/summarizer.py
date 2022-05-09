@@ -57,12 +57,14 @@ async def generate_summary(summary_id: int, url: str):
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any
     top = generate_keys(total_summary)
-    await TextSummary.filter(id=summary_id).update(summary=total_summary, keywords=str(top))
+    keytop = top[0] if top else ''
+    keys = top[1:] if len(top) > 1 else ''
+    logger.info(f'Retrived top {keytop} and keys {keys}')
+    await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
 
 def generate_keys(summary: str):
-    th = .45
-    classifier = pipeline("zero-shot-classification",
-                      model="facebook/bart-large-mnli")
+    th = .55
+    classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
     preds = classifier(summary, CANDIDATE_LABELS, multi_label=True)
     labels, scores = preds['labels'], preds['scores']
     logger.info(f'Keywords labels predicted: {labels}')

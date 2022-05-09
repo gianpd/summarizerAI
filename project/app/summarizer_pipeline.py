@@ -14,7 +14,6 @@ logger = logging.getLogger("Summarizer")
 def load_tokenizer(tokenizer_model: str = 'facebook/bart-large-mnli'):
     return AutoTokenizer.from_pretrained(tokenizer_model)
 
-
 def get_nest_sentences(document: str, tokenizer: AutoTokenizer, token_max_length = 1024):
     """
     Starting from a large document, a list of sequential string is computed, such that each string has
