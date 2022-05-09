@@ -1,3 +1,4 @@
+from ast import keyword
 import sys
 import json
 import requests
@@ -5,13 +6,15 @@ import requests
 from typing import Text
 
 from newspaper import Article
-# from transformers import pipeline
+from transformers import pipeline
+from app.api import crud
 from app.models.tortoise import TextSummary
 from app.models.pydantic import SummaryPayloadSchema
 from app.config import get_settings
 from app.summarizer_pipeline import get_nest_sentences, load_tokenizer
 
 Config = get_settings()
+CANDIDATE_LABELS = Config.CANDIDATE_LABELS
 
 import logging
 logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
@@ -52,4 +55,19 @@ async def generate_summary(summary_id: int, url: str):
         summaries.append(summary)
     total_summary = ''.join(summaries)
     logger.info(f'Total summary: {total_summary}')
-    await TextSummary.filter(id=summary_id).update(summary=total_summary)
+    # get top predicted keywords if any
+    top = generate_keys(total_summary)
+    await TextSummary.filter(id=summary_id).update(summary=total_summary, keywords=str(top))
+
+def generate_keys(summary: str):
+    th = .45
+    classifier = pipeline("zero-shot-classification",
+                      model="facebook/bart-large-mnli")
+    preds = classifier(summary, CANDIDATE_LABELS, multi_label=True)
+    labels, scores = preds['labels'], preds['scores']
+    logger.info(f'Keywords labels predicted: {labels}')
+    top5 = labels[:5]
+    top = [x for i, x in enumerate(top5) if scores[i] > th]
+    logger.info(f'Top keywords with score greather than {th}: {top}')
+    return top if len(top) else ''
+
