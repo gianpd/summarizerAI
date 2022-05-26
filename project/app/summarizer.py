@@ -7,9 +7,7 @@ from typing import Text
 
 from newspaper import Article
 from transformers import pipeline
-from app.api import crud
 from app.models.tortoise import TextSummary
-from app.models.pydantic import SummaryPayloadSchema
 from app.config import get_settings
 from app.summarizer_pipeline import get_nest_sentences, load_tokenizer
 
