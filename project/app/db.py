@@ -44,7 +44,6 @@ async def generate_schema() -> None:
     )
     logger.info("Generating database schema via Tortoise ...")
     await Tortoise.generate_schemas()
-    await Tortoise.close_connections()
 
 
 if __name__ == "__main__":
