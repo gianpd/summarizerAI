@@ -35,12 +35,10 @@ def get_hf_inference_data_input(article_text):
     data = json.dumps(payload)
     return data
 
-async def generate_summary(summary_id: int, url: str):
+def retrive_summary(text: str):
+    """Get a string and generate its summary by calling the HF API"""
     summaries = []
-    article = download_text(url)
-    logger.info(f'Retrived url text: {article.text}')
-    # get text chunks where each chunk has 1024 tokens
-    text_chunks = get_nest_sentences(article.text, load_tokenizer())
+    text_chunks = get_nest_sentences(text, load_tokenizer())
     for i, str_chunk in enumerate(text_chunks):
         data = get_hf_inference_data_input(str_chunk)
         response = requests.request("POST", API_URL, headers=headers, data=data)
@@ -52,7 +50,18 @@ async def generate_summary(summary_id: int, url: str):
         summary = summary[0]['summary_text']
         logger.info(f'summary {i}: {summary}')
         summaries.append(summary)
-    total_summary = ''.join(summaries)
+    return ''.join(summaries)
+
+def generate_summary_from_text(text: str):
+    logger.info(f"Generating summary from text: {text}")
+    total_summary = retrive_summary(text)
+    return total_summary
+
+
+async def generate_summary(summary_id: int, url: str):
+    article = download_text(url)
+    logger.info(f'Retrived url text: {article.text}')
+    total_summary = retrive_summary(article.text)
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any
     top = generate_keys(total_summary)

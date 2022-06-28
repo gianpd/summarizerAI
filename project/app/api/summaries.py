@@ -11,10 +11,12 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Path
 
 from app.api import crud
 from app.models.tortoise import SummarySchema
-from app.summarizer import generate_summary
+from app.summarizer import generate_summary, generate_summary_from_text
 from app.models.tortoise import TextSummary
 
 from app.models.pydantic import (  # isort:skip
+    SummaryPayloadFromText,
+    SummaryFromTextResponseSchema,
     SummaryPayloadSchema,
     SummaryResponseSchema,
     SummaryUpdatePayloadSchema,
@@ -22,11 +24,21 @@ from app.models.pydantic import (  # isort:skip
 
 router = APIRouter()
 
+@router.post("/text", response_model=SummaryFromTextResponseSchema, status_code=201)
+async def create_summary_from_text(
+    payload: SummaryPayloadFromText) -> SummaryFromTextResponseSchema:
+
+    total_summary = generate_summary_from_text(payload.text)
+    response = {"text": payload.text, "summary": total_summary}
+    logger.info(f"Returning response: {response}")
+    return response
+
+
+
 @router.post("/", response_model=SummaryResponseSchema, status_code=201)
 async def create_summary(
     payload: SummaryPayloadSchema, background_tasks: BackgroundTasks) -> SummaryResponseSchema:
     logger.info('Creating new summary ...')
-
     # if payload url is already present do not execute post
     summary_exist = await crud.search_by_url(payload.url)
     if summary_exist:
