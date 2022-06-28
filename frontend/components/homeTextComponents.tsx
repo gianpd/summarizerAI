@@ -71,19 +71,7 @@ const SummarizerFromText: React.FC = () => {
 
     return (
         <>
-        <div className='h-screen flex'> 
-            <div className='max-w-md mx-auto p-1'>
-                <div className='bg-slate-800 p-8 text-white'>
-                    <div className='text-center my-4'>
-                        <h1 className={gradientTextStyle + " text-7xl font-light"}>
-                            Summarizer AI
-                        </h1>
-                        <div className={gradientTextStyle + " text-4xl font-ligth aspect-auto"}>Your AI assistent</div>
-                    </div>
-                    {resultsElement}
-                </div>
-            </div>
-        </div>
+        {resultsElement}
         </>
     )
 }

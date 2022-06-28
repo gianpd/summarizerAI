@@ -19,7 +19,7 @@ const Form: React.FC<FormProps> = (props) => {
         }
     }
 
-    let statusColor = "text-slate-500";
+    let statusColor = "text-slate-300";
     let statusText = null;
     if (!isPromptValid) {
         statusColor = "text-red-400";
@@ -28,7 +28,7 @@ const Form: React.FC<FormProps> = (props) => {
 
     return (
         <>
-        <div className="bg-slate-700 p-4 my-3 rounded-md">
+        <div className="bg-cyan-400 p-5 my-3 rounded-md">
             <p>
                 {props.comment}
             </p>
