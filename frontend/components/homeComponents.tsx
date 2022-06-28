@@ -68,11 +68,14 @@ const SummarizerAI: React.FC = () => {
     } else {
         resultsElement = (
             <Form
+            comment="Set any valid URL and get a summarized version of it!"
+            placeholder='https://www.ansa.it'
+            startsWith='https://'
             prompt={prompt}
             setPrompt={setPrompt}
             onSubmit={onSubmit}
             isLoading={isLoading}
-            characterLimit={255}/>
+            characterLimit={150}/>
         )
     }
 

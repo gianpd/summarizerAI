@@ -1,6 +1,9 @@
 import React from 'react';
 
 interface FormProps {
+    comment: string,
+    placeholder: string
+    startsWith: string
     prompt: string,
     setPrompt: any,
     onSubmit: any,
@@ -27,14 +30,14 @@ const Form: React.FC<FormProps> = (props) => {
         <>
         <div className="bg-slate-700 p-4 my-3 rounded-md">
             <p>
-                Paste any valid URL and get a summarizer version of it.
+                {props.comment}
             </p>
         </div>
 
         <input 
-        className="p-2 w-full rounded-md focus:outline-teal-400 focus:outline text-slate-700"
+        className="p-9 w-full rounded-md focus:outline-teal-400 focus:outline text-slate-700"
         type="text"
-        placeholder='https://www.ansa.it'
+        placeholder={props.placeholder}
         value={props.prompt}
         onChange={(e) => updatePromptValue(e.currentTarget.value)}
         required
@@ -49,7 +52,7 @@ const Form: React.FC<FormProps> = (props) => {
         className="bg-gradient-to-r from-teal-400
         to-blue-500 disabled:opacity-50 w-full p-2 rounded-md text-lg"
         onClick={props.onSubmit}
-        disabled={!props.isLoading || !isPromptValid || props.prompt.length == 0 || !props.prompt.startsWith('https://')}>
+        disabled={!props.isLoading || !isPromptValid || props.prompt.length == 0 || !props.prompt.startsWith(props.startsWith)}>
             Submit
         </button>
 
