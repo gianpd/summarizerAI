@@ -11,3 +11,26 @@ class InferenceModel:
         torch.set_grad_enabled(False) # inference mode: do not need grad
 
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+        model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
+        model.to(ipex.DEVICE).eval()
+        model = torch.jit.script(model)
+
+        self.model = model
+
+
+    def predict(self, message: str): 
+        with torch.no_grad():
+            input_ids = self.tokenizer.encode(message, return_tensor='pt')
+            preds = self.model.generate(
+                input_ids,
+                do_sample=True,
+                max_length=142,
+                num_beams=3,
+                no_repeate_ngram_size=3,
+                early_stopping=True
+            )
+            
+        return self.tokenizer.decode(preds[0], skip_special_tokens=True)
+
+
+        
