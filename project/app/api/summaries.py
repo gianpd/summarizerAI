@@ -1,3 +1,4 @@
+from operator import rshift
 import sys
 import logging
 logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
@@ -11,6 +12,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Path
 from app.api import crud
 from app.models.tortoise import SummarySchema
 from app.summarizer import generate_summary
+from app.models.tortoise import TextSummary
 
 from app.models.pydantic import (  # isort:skip
     SummaryPayloadSchema,
@@ -24,13 +26,21 @@ router = APIRouter()
 async def create_summary(
     payload: SummaryPayloadSchema, background_tasks: BackgroundTasks) -> SummaryResponseSchema:
     logger.info('Creating new summary ...')
+
+    # if payload url is already present do not execute post
+    summary_exist = await crud.search_by_url(payload.url)
+    if summary_exist:
+        response = {'url': payload.url, 'id': int(summary_exist['id'])}
+        logger.info(f'Summary already present on the DB ---> {response}')
+        return response
+
     summary_id = await crud.post(payload)
     logger.info(f'New summary id {summary_id} created')
     response_object = {"id": summary_id, "url": payload.url}
     logger.info('Calling AI summary inference ...')
     logger.debug(f'Summary id / summary url: {response_object}')
     background_tasks.add_task(generate_summary, summary_id, payload.url)
-    return
+    return {'url': payload.url, 'id': summary_id}
 
 
 @router.get("/keyword/{key}/", response_model=List[SummarySchema])
