@@ -11,7 +11,7 @@ const SummarizerAI: React.FC = () => {
     const [postId, setPostID] = React.useState("");
     const [summary, setSummary] = React.useState("");
     const [hasresult, setHasResult] = React.useState(false);
-    const [isLoading, setIsLoading] = React.useState(false);
+    const [isLoading, setIsLoading] = React.useState(true);
 
     const onSubmit = () => {
         // primo metodo chiamato quando url è inserito -> POST request to the back-end
@@ -44,7 +44,7 @@ const SummarizerAI: React.FC = () => {
     const onResult = (data: any) => {
         setSummary(data.summary);
         setHasResult(true);
-        setIsLoading(false);
+        setIsLoading(true);
     }
 
     console.log(summary);
@@ -52,7 +52,7 @@ const SummarizerAI: React.FC = () => {
     const onReset = () => {
         setPrompt("")
         setHasResult(false)
-        setIsLoading(false)
+        setIsLoading(true)
     }
 
 
@@ -77,18 +77,18 @@ const SummarizerAI: React.FC = () => {
     }
 
     const gradientTextStyle =
-    "text-white text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-700 font-light w-fit mx-auto";
+    "text-white text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-400 font-light w-fit mx-auto";
 
     return (
         <>
         <div className='h-screen flex'> 
-            <div className='max-w-md mx-auto p-2'>
-                <div className='bg-slate-800 p-6 roundend-md text-white'>
-                    <div className='text-center my-6'>
+            <div className='max-w-md mx-auto p-1'>
+                <div className='bg-slate-800 p-8 text-white'>
+                    <div className='text-center my-4'>
                         <h1 className={gradientTextStyle + " text-7xl font-light"}>
                             Summarizer AI
                         </h1>
-                        <div className={gradientTextStyle + " text-3xl font-ligth"}>Your AI assistent</div>
+                        <div className={gradientTextStyle + " text-4xl font-ligth aspect-auto"}>Your AI assistent</div>
                     </div>
                     {resultsElement}
                 </div>

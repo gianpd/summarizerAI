@@ -37,6 +37,7 @@ const Form: React.FC<FormProps> = (props) => {
         placeholder='https://www.ansa.it'
         value={props.prompt}
         onChange={(e) => updatePromptValue(e.currentTarget.value)}
+        required
         ></input>
         <div className={statusColor + " flex justify-between my-2 mb-6 text-sm"}>
             <div>{statusText}</div>
@@ -48,7 +49,7 @@ const Form: React.FC<FormProps> = (props) => {
         className="bg-gradient-to-r from-teal-400
         to-blue-500 disabled:opacity-50 w-full p-2 rounded-md text-lg"
         onClick={props.onSubmit}
-        disabled={props.isLoading || !isPromptValid}>
+        disabled={!props.isLoading || !isPromptValid || props.prompt.length == 0 || !props.prompt.startsWith('https://')}>
             Submit
         </button>
 
