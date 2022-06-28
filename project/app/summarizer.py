@@ -44,7 +44,7 @@ async def generate_summary(summary_id: int, url: str):
     # get text chunks where each chunk has 1024 tokens
     text_chunks = get_nest_sentences(article.text, load_tokenizer())
     # make a summary for each chunk
-    summaries = [model_class(str_chunk) for str_chunk in text_chunks]
+    summaries = [model_class.predict(str_chunk) for str_chunk in text_chunks]
     total_summary = ''.join(summaries)
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any

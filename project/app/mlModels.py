@@ -30,15 +30,15 @@ class InferenceModel:
         self.model = model
 
 
-    def forward(self, message: str): 
+    def predict(self, message: str): 
         with torch.no_grad():
-            input_ids = self.tokenizer.encode(message, return_tensor='pt')
+            input_ids = self.tokenizer.encode(message, return_tensors='pt')
             preds = self.model.generate(
                 input_ids,
                 do_sample=True,
                 max_length=142,
                 num_beams=3,
-                no_repeate_ngram_size=3,
+                no_repeat_ngram_size=3,
                 early_stopping=True
             )
             
