@@ -1,8 +1,16 @@
+import os
+import sys
+
 import torch
 import intel_extension_for_pytorch as ipex
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM 
 from transformers import logging as T_LOGGER
 T_LOGGER.set_verbosity_error()
+
+import logging
+logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
+                level=logging.INFO, datefmt=None)
+logger = logging.getLogger("Summarizer")
 
 
 class InferenceModel:
@@ -12,13 +20,17 @@ class InferenceModel:
 
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
         model = AutoModelForSeq2SeqLM.from_pretrained(checkpoint)
-        model.to(ipex.DEVICE).eval()
-        model = torch.jit.script(model)
+        logger.info("Model and Tokenizer downloaded.")
+
+        model = model.to(memory_format=torch.channels_last)
+        if quantize: model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+        model = ipex.optimize(model)
+        # model = torch.jit.script(model)
 
         self.model = model
 
 
-    def predict(self, message: str): 
+    def forward(self, message: str): 
         with torch.no_grad():
             input_ids = self.tokenizer.encode(message, return_tensor='pt')
             preds = self.model.generate(

@@ -10,6 +10,7 @@ from transformers import pipeline
 from app.models.tortoise import TextSummary
 from app.config import get_settings
 from app.summarizer_pipeline import get_nest_sentences, load_tokenizer
+from app.mlModels import InferenceModel
 
 Config = get_settings()
 CANDIDATE_LABELS = Config.CANDIDATE_LABELS
@@ -21,8 +22,10 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
 logger = logging.getLogger("Summarizer")
 
 
-headers = {"Authorization": f"Bearer {Config.hf_token}"}
-API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+# headers = {"Authorization": f"Bearer {Config.hf_token}"}
+# API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+
+model_class = InferenceModel(checkpoint = "facebook/bart-large-cnn")
 
 def download_text(url: str):
     article = Article(url)
@@ -36,22 +39,12 @@ def get_hf_inference_data_input(article_text):
     return data
 
 async def generate_summary(summary_id: int, url: str):
-    summaries = []
     article = download_text(url)
     logger.info(f'Retrived url text: {article.text}')
     # get text chunks where each chunk has 1024 tokens
     text_chunks = get_nest_sentences(article.text, load_tokenizer())
-    for i, str_chunk in enumerate(text_chunks):
-        data = get_hf_inference_data_input(str_chunk)
-        response = requests.request("POST", API_URL, headers=headers, data=data)
-        try:
-            summary = json.loads(response.content.decode("utf-8"))
-        except json.JSONDecodeError as e:
-            logger.error(e)
-            continue
-        summary = summary[0]['summary_text']
-        logger.info(f'summary {i}: {summary}')
-        summaries.append(summary)
+    # make a summary for each chunk
+    summaries = [model_class(str_chunk) for str_chunk in text_chunks]
     total_summary = ''.join(summaries)
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any
@@ -60,6 +53,33 @@ async def generate_summary(summary_id: int, url: str):
     keys = top[1:] if len(top) > 1 else ''
     logger.info(f'Retrived top {keytop} and keys {keys}')
     await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
+
+
+# async def generate_summary(summary_id: int, url: str):
+#     summaries = []
+#     article = download_text(url)
+#     logger.info(f'Retrived url text: {article.text}')
+#     # get text chunks where each chunk has 1024 tokens
+#     text_chunks = get_nest_sentences(article.text, load_tokenizer())
+#     for i, str_chunk in enumerate(text_chunks):
+#         data = get_hf_inference_data_input(str_chunk)
+#         response = requests.request("POST", API_URL, headers=headers, data=data)
+#         try:
+#             summary = json.loads(response.content.decode("utf-8"))
+#         except json.JSONDecodeError as e:
+#             logger.error(e)
+#             continue
+#         summary = summary[0]['summary_text']
+#         logger.info(f'summary {i}: {summary}')
+#         summaries.append(summary)
+#     total_summary = ''.join(summaries)
+#     logger.info(f'Total summary: {total_summary}')
+#     # get top predicted keywords if any
+#     top = generate_keys(total_summary)
+#     keytop = top[0] if top else ''
+#     keys = top[1:] if len(top) > 1 else ''
+#     logger.info(f'Retrived top {keytop} and keys {keys}')
+#     await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
 
 def generate_keys(summary: str):
     classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")

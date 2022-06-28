@@ -21,7 +21,8 @@ RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
 RUN pip install -U pip setuptools wheel && pip install -U spacy\
-    && python -m spacy download en_core_web_sm && python -m spacy download it_core_news_sm
+    && python -m spacy download en_core_web_sm && python -m spacy download it_core_news_sm\
+    && python -m pip install intel_extension_for_pytorch -f https://software.intel.com/ipex-whl-stable
 
 # add app
 COPY . .
