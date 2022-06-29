@@ -20,9 +20,14 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
                 level=logging.INFO, datefmt=None)
 logger = logging.getLogger("Summarizer")
 
+from huggingface_hub.inference_api import InferenceApi
 
-headers = {"Authorization": f"Bearer {Config.hf_token}"}
-API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn" 
+inference = InferenceApi(repo_id="facebook/bart-large-cnn", token=Config.hf_token)
+
+
+# headers = {"Authorization": f"Bearer {Config.hf_token}"}
+# API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
 
 def download_text(url: str):
     article = Article(url)
@@ -31,7 +36,7 @@ def download_text(url: str):
     return article
 
 def get_hf_inference_data_input(article_text):
-    payload = {'inputs': article_text, 'parameters': {'do_sample': False}}
+    payload = {'inputs': article_text, 'parameters': {'do_sample': True}}
     data = json.dumps(payload)
     return data
 
@@ -40,21 +45,25 @@ def retrive_summary(text: str):
     summaries = []
     text_chunks = get_nest_sentences(text, load_tokenizer())
     for i, str_chunk in enumerate(text_chunks):
-        data = get_hf_inference_data_input(str_chunk)
-        response = requests.request("POST", API_URL, headers=headers, data=data)
-        try:
-            summary = json.loads(response.content.decode("utf-8"))
-        except json.JSONDecodeError as e:
-            logger.error(e)
-            continue
-        summary = summary[0]['summary_text']
+        # data = get_hf_inference_data_input(str_chunk)
+        # response = requests.request("POST", API_URL, headers=headers, data=data)
+        # try:
+        #     summary = json.loads(response.content.decode("utf-8"))
+        # except json.JSONDecodeError as e:
+        #     logger.error(e)
+        #     continue
+        # summary = summary[0]['summary_text']
+
+        summary = inference(str_chunk)[0]['summary_text']
         logger.info(f'summary {i}: {summary}')
         summaries.append(summary)
     return ''.join(summaries)
 
 def generate_summary_from_text(text: str):
+    start = time.time()
     logger.info(f"Generating summary from text: {text}")
     total_summary = retrive_summary(text)
+    logger.info(f"*** ELAPSED CREATE SUMMARY FROM TEXT: {time.time() - start} s")
     return total_summary
 
 
