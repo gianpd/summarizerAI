@@ -32,7 +32,7 @@ class InferenceModel:
 
     def predict(self, message: str): 
         with torch.no_grad():
-            input_ids = self.tokenizer.encode(message, return_tensors='pt')
+            input_ids = self.tokenizer.encode(message, truncation=True, padding=True, return_tensors='pt')
             preds = self.model.generate(
                 input_ids,
                 do_sample=True,

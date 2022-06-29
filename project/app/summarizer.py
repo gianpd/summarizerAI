@@ -3,7 +3,7 @@ import sys
 import json
 import requests
 
-from typing import Text
+import time
 
 from newspaper import Article
 from transformers import pipeline
@@ -39,6 +39,7 @@ def get_hf_inference_data_input(article_text):
     return data
 
 async def generate_summary(summary_id: int, url: str):
+    start = time.time()
     article = download_text(url)
     logger.info(f'Retrived url text: {article.text}')
     # get text chunks where each chunk has 1024 tokens
@@ -46,13 +47,14 @@ async def generate_summary(summary_id: int, url: str):
     # make a summary for each chunk
     summaries = [model_class.predict(str_chunk) for str_chunk in text_chunks]
     total_summary = ''.join(summaries)
+    logger.info(f"*** ELAPSED: {time.time() - start} s")
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any
-    top = generate_keys(total_summary)
-    keytop = top[0] if top else ''
-    keys = top[1:] if len(top) > 1 else ''
-    logger.info(f'Retrived top {keytop} and keys {keys}')
-    await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
+    # top = generate_keys(total_summary)
+    # keytop = top[0] if top else ''
+    # keys = top[1:] if len(top) > 1 else ''
+    # logger.info(f'Retrived top {keytop} and keys {keys}')
+    await TextSummary.filter(id=summary_id).update(summary=total_summary)
 
 
 # async def generate_summary(summary_id: int, url: str):
