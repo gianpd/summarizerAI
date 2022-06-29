@@ -1,7 +1,5 @@
-from ast import keyword
 import sys
 import json
-import requests
 
 import time
 
