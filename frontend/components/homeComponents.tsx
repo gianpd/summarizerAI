@@ -75,7 +75,7 @@ const SummarizerAI: React.FC = () => {
             setPrompt={setPrompt}
             onSubmit={onSubmit}
             isLoading={isLoading}
-            characterLimit={150}/>
+            characterLimit={750}/>
         )
     }
 ;

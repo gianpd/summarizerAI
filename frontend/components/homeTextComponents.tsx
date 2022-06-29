@@ -65,7 +65,7 @@ const SummarizerFromText: React.FC = () => {
             setPrompt={setPrompt}
             onSubmit={onSubmit}
             isLoading={isLoading}
-            characterLimit={1024}/>
+            characterLimit={5024}/>
         )
     }
 

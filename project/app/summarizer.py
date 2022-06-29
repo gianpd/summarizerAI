@@ -3,7 +3,7 @@ import sys
 import json
 import requests
 
-from typing import Text
+import time
 
 from newspaper import Article
 from transformers import pipeline
@@ -59,16 +59,19 @@ def generate_summary_from_text(text: str):
 
 
 async def generate_summary(summary_id: int, url: str):
+    start = time.time()
     article = download_text(url)
     logger.info(f'Retrived url text: {article.text}')
     total_summary = retrive_summary(article.text)
+    logger.info(f"*** ELAPSED CREATE SUMMARY POST: {time.time() - start} s")
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any
-    top = generate_keys(total_summary)
-    keytop = top[0] if top else ''
-    keys = top[1:] if len(top) > 1 else ''
-    logger.info(f'Retrived top {keytop} and keys {keys}')
-    await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
+    # top = generate_keys(total_summary)
+    # keytop = top[0] if top else ''
+    # keys = top[1:] if len(top) > 1 else ''
+    # logger.info(f'Retrived top {keytop} and keys {keys}')
+    # await TextSummary.filter(id=summary_id).update(summary=total_summary, keyTop=keytop, keywords=keys)
+    await TextSummary.filter(id=summary_id).update(summary=total_summary)
 
 def generate_keys(summary: str):
     classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")

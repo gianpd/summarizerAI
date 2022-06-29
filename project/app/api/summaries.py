@@ -1,4 +1,3 @@
-from operator import rshift
 import sys
 import logging
 logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
@@ -6,6 +5,11 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
 logger = logging.getLogger("summaries")
 
 from typing import List
+
+from datetime import datetime, timezone
+
+import time
+
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Path
 
@@ -42,9 +46,16 @@ async def create_summary(
     # if payload url is already present do not execute post
     summary_exist = await crud.search_by_url(payload.url)
     if summary_exist:
-        response = {'url': payload.url, 'id': int(summary_exist['id'])}
-        logger.info(f'Summary already present on the DB ---> {response}')
-        return response
+        created_at = summary_exist['created_at']
+        now = datetime.now(timezone.utc)
+        delta = now - created_at
+        logger.info(f"created at: {created_at}\n now: {now}\n delta: {delta.seconds}")
+        if delta.seconds > 3600.0:
+            logger.info(f"Too much time from last news summary ...")
+        else:
+            response = {'url': payload.url, 'id': int(summary_exist['id'])}
+            logger.info(f'Summary already present on the DB ---> {response}')
+            return response
 
     summary_id = await crud.post(payload)
     logger.info(f'New summary id {summary_id} created')
