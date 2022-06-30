@@ -58,7 +58,7 @@ const SummarizerFromText: React.FC = () => {
     } else {
         resultsElement = (
             <Form
-            comment="Submit a text and get a summarized version of it!"
+            comment="Submit a text and get a summary version of it!"
             placeholder='enter some text'
             startsWith=''
             prompt={prompt}

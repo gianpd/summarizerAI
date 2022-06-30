@@ -8,9 +8,6 @@ from typing import List
 
 from datetime import datetime, timezone
 
-import time
-
-
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Path
 
 from app.api import crud

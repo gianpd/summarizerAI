@@ -28,14 +28,15 @@ const Form: React.FC<FormProps> = (props) => {
 
     return (
         <>
-        <div className="bg-cyan-400 p-5 my-3 rounded-md">
-            <p>
+        <div className="bg-cyan-600 p-3 my-1 rounded-md">
+            <p className='font-mono text-xl'>
                 {props.comment}
             </p>
         </div>
+        
 
         <input 
-        className="p-9 w-full rounded-md focus:outline-teal-400 focus:outline text-slate-700"
+        className="font-mono p-9 w-full rounded-md focus:outline-teal-400 focus:outline text-slate-700"
         type="text"
         placeholder={props.placeholder}
         value={props.prompt}
@@ -49,7 +50,7 @@ const Form: React.FC<FormProps> = (props) => {
             </div>
         </div>
         <button
-        className="bg-gradient-to-r from-teal-400
+        className="font-mono bg-gradient-to-r from-teal-400
         to-blue-500 disabled:opacity-50 w-full p-2 rounded-md text-lg"
         onClick={props.onSubmit}
         disabled={!props.isLoading || !isPromptValid || props.prompt.length == 0 || !props.prompt.startsWith(props.startsWith)}>
