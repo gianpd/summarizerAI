@@ -16,6 +16,7 @@ pytest-cov==3.0.0
 torch==1.11.0
 transformers==4.18.0
 newspaper3k==0.2.8
+sumy==0.10.0
 #scrapy
 #flake8==3.9.2
 #black==21.6b0

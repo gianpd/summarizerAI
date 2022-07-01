@@ -7,7 +7,7 @@ from newspaper import Article
 from transformers import pipeline
 from app.models.tortoise import TextSummary
 from app.config import get_settings
-from app.summarizer_pipeline import get_nest_sentences, load_tokenizer, deterministic_summary_pipeline
+from app.summarizer_pipeline import get_nest_sentences, load_tokenizer, extractive_summary_pipeline, extractive_summary_lsa
 
 Config = get_settings()
 CANDIDATE_LABELS = Config.CANDIDATE_LABELS
@@ -61,7 +61,8 @@ def generate_summary_from_text(text: str):
     start = time.time()
     logger.info(f"Generating summary from text: {text}")
     # total_summary = retrive_summary(text)
-    total_summary = deterministic_summary_pipeline(text)
+    # total_summary = extractive_summary_pipeline(text, n_sents=5)
+    total_summary = extractive_summary_lsa(text, n_sents=5)
     logger.info(f"*** ELAPSED CREATE SUMMARY FROM TEXT: {time.time() - start} s")
     return total_summary
 
@@ -71,7 +72,7 @@ async def generate_summary(summary_id: int, url: str):
     article = download_text(url)
     logger.info(f'Retrived url text: {article.text}')
     # total_summary = retrive_summary(article.text)
-    total_summary = deterministic_summary_pipeline(article.text)
+    total_summary = extractive_summary_pipeline(article.text)
     logger.info(f"*** ELAPSED CREATE SUMMARY POST: {time.time() - start} s")
     logger.info(f'Total summary: {total_summary}')
     # get top predicted keywords if any

@@ -1,22 +1,74 @@
 import os
 import sys
-
-from typing import List, Union, Optional, Dict
-
-import spacy
-from spacy.lang.en.stop_words import STOP_WORDS
-from string import punctuation
-from collections import Counter
-from heapq import nlargest
-
-from transformers import AutoTokenizer
-
-nlp = spacy.load('en_core_web_sm')
-
 import logging
 logging.basicConfig(stream=sys.stdout, format='%(asctime)-15s %(message)s',
                 level=logging.INFO, datefmt=None)
 logger = logging.getLogger("Summarizer")
+
+from typing import List, Dict
+from functools import lru_cache
+
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS
+from string import punctuation
+from collections import Counter, namedtuple
+from operator import attrgetter
+
+import nltk
+nltk.download('punkt')
+from sumy.parsers.html import HtmlParser
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+
+
+LANGUAGE = "english"
+stemmer = Stemmer(LANGUAGE)
+summarizer = Summarizer(stemmer)
+summarizer.stop_words = get_stop_words(LANGUAGE)
+
+# from app.config import get_settings
+
+from transformers import AutoTokenizer
+# from huggingface_hub.inference_api import InferenceApi
+
+# ### instantiate the hugging face hub inference
+# # Config = get_settings()
+# # API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn" 
+# inference = InferenceApi(repo_id="facebook/bart-large-cnn", token=os.getenv('HF_TOKEN'))
+
+# spacy nlp object
+nlp = spacy.load("en_core_web_sm")
+
+SentenceInfo = namedtuple("SentenceInfo", ("sentence", "order", "rates",))
+
+@lru_cache
+def load_tokenizer(tokenizer_model: str = 'facebook/bart-large-mnli'):
+    return AutoTokenizer.from_pretrained(tokenizer_model)
+
+# tokenizer = load_tokenizer()
+
+
+# def get_summaries_from_hf(text: str) -> str:
+#     """
+#     Get summaries from hf: first of all get nested sentences in order to be sure each text has a max number of 1024 tokens, then call hf api inference.
+    
+#     --Parameters
+#      - text: (str) the string text to be summarized.
+
+#      return a string contained the total summary.
+
+#      """
+#     global tokenizer
+#     summaries = []
+#     str_chunks = get_nest_sentences(text, tokenizer)
+#     for i, str_chunk in enumerate(str_chunks):
+#         summary = inference(str_chunk)[0]['summary_text']
+#         logger.info(f"Retrived summary {i}: {summary}")
+#         summaries.append(summary)
+#     return ' '.join(summaries)
 
 def get_significant_words_list(doc: spacy.tokens.doc.Doc) -> List[str]:
     """
@@ -52,40 +104,35 @@ def get_sent_strenght(doc: spacy.tokens.doc.Doc, freq_word: Counter) -> Dict:
                     sent_strenght[sent] = freq_word[word.text]
     return sent_strenght
 
+def get_extractive_summary(sent_strenght: Dict, n_sents: int = 5):
+    infos = (SentenceInfo(s, o, sent_strenght.get(s)) 
+        for o, s in enumerate(sent_strenght.keys()))
 
-def deterministic_summary_pipeline(doc: str) -> str:
-    """Get a final summary of a doc, using a number of top sentences."""
+    infos = sorted(infos, key=attrgetter("rates"), reverse=True)[:n_sents]
+    infos = sorted(infos, key=attrgetter("order"))
+    logger.info(f"Extracted {len(infos)} sentences ...")
+    return tuple(i.sentence.text for i in infos)
+
+
+def extractive_summary_pipeline(doc: str, n_sents: int = 5) -> str:
+    """Get a final summary of a doc, using a maximum number n_sents of top sentences."""
     doc = nlp(doc)
-    n_sents = len(list(doc.sents))
-    logger.info(f"Starting to compute summary from {n_sents} sentences ...")
+    logger.info(f"Starting to compute summary from {len(list(doc.sents))} sentences ...")
     words = get_significant_words_list(doc)
     freq_word = get_frequency_words(words)
     sent_strenght = get_sent_strenght(doc, freq_word)
-    
-    n_sents = int(n_sents * 0.30) # use just the 30% of the sentences
-    logger.info(f"Getting the {n_sents} largest sentences for the summary ...")
-    summarized_sentences = [x.text for x in nlargest(n_sents, sent_strenght, key=sent_strenght.get)]
 
-    summary = ''.join(summarized_sentences)
-
+    summaries = get_extractive_summary(sent_strenght, n_sents=n_sents)
     start_sentence = list(doc.sents)[0].text
+    total_summary = ' '.join(summaries)
+    if start_sentence in summaries:
+        return total_summary
+    return start_sentence + total_summary
 
-    if start_sentence in summarized_sentences:
-        if summarized_sentences[0] == start_sentence:
-            return summary
-        else:
-            #TODO: non va bene perchè sto mettendo la frase più importante nella posizione diversa
-            s1 = summarized_sentences[0]
-            idx_start_sentence = summarized_sentences.index(start_sentence)
-            summarized_sentences[idx_start_sentence] = s1
-            summarized_sentences[0] = start_sentence
-            return ''.join(summarized_sentences)
-    else:
-        return start_sentence + summary
-
-
-def load_tokenizer(tokenizer_model: str = 'facebook/bart-large-mnli'):
-    return AutoTokenizer.from_pretrained(tokenizer_model)
+def extractive_summary_lsa(text: str, n_sents: int = 5):
+    parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
+    extractive_summary = ' '.join([sentence._text for sentence in summarizer(parser.document, n_sents)])
+    return extractive_summary
 
 def get_nest_sentences(document: str, tokenizer: AutoTokenizer, token_max_length = 1024):
     """
