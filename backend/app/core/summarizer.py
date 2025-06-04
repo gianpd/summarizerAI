@@ -7,8 +7,8 @@ from functools import lru_cache
 from collections import Counter, namedtuple
 from operator import attrgetter
 
-import spacy
-from spacy.lang.en.stop_words import STOP_WORDS
+# import spacy
+# from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
 import nltk
 from newspaper import Article
@@ -48,11 +48,11 @@ summarizer = Summarizer(stemmer)
 summarizer.stop_words = get_stop_words(LANGUAGE)
 
 # Load spacy model
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    logger.warning("Spacy model 'en_core_web_sm' not found. Please install it with: python -m spacy download en_core_web_sm")
-    nlp = None
+# try:
+#     nlp = spacy.load("en_core_web_sm")
+# except OSError:
+#     logger.warning("Spacy model 'en_core_web_sm' not found. Please install it with: python -m spacy download en_core_web_sm")
+nlp = None
 
 SentenceInfo = namedtuple("SentenceInfo", ("sentence", "order", "rates",))
 
@@ -70,16 +70,19 @@ def download_text(url: str) -> Article:
     return article
 
 
-def get_significant_words_list(doc) -> List[str]:
-    """Get a list of important words (PROPN; ADJ; NOUN; VERB) excluding stop words and punctuation"""
+def get_significant_words_list(text: str) -> List[str]:
+    """Get a list of important words excluding stop words and punctuation"""
+    # Simplified version without spaCy
+    import re
     words = []
-    stopwords = list(STOP_WORDS)
-    pos_tag = ['PROPN', 'ADJ', 'NOUN', 'VERB']
-    for token in doc:
-        if (token.text in stopwords or token.text in punctuation):
-            continue
-        if (token.pos_ in pos_tag):
-            words.append(token.text)
+    # Basic stop words
+    stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'}
+    
+    # Simple word extraction
+    words_raw = re.findall(r'\b[a-zA-Z]+\b', text.lower())
+    for word in words_raw:
+        if word not in stopwords and word not in punctuation and len(word) > 2:
+            words.append(word)
     return words
 
 
@@ -94,16 +97,18 @@ def get_frequency_words(words: List[str]) -> Counter:
     return freq_word
 
 
-def get_sent_strength(doc, freq_word: Counter) -> Dict:
+def get_sent_strength(sentences: List[str], freq_word: Counter) -> Dict:
     """Get sentence importance scores based on word frequencies"""
     sent_strength = {}
-    for sent in doc.sents:
-        for word in sent:
-            if word.text in freq_word.keys():
-                if sent in sent_strength.keys():
-                    sent_strength[sent] += freq_word[word.text]
-                else:
-                    sent_strength[sent] = freq_word[word.text]
+    import re
+    
+    for sent in sentences:
+        words = re.findall(r'\b[a-zA-Z]+\b', sent.lower())
+        score = 0
+        for word in words:
+            if word in freq_word:
+                score += freq_word[word]
+        sent_strength[sent] = score
     return sent_strength
 
 
@@ -115,29 +120,13 @@ def get_extractive_summary(sent_strength: Dict, n_sents: int = 5):
     infos = sorted(infos, key=attrgetter("rates"), reverse=True)[:n_sents]
     infos = sorted(infos, key=attrgetter("order"))
     logger.info(f"Extracted {len(infos)} sentences ...")
-    return tuple(i.sentence.text for i in infos)
+    return tuple(i.sentence for i in infos)
 
 
-def extractive_summary_pipeline(doc: str, n_sents: int = 5) -> str:
-    """Generate extractive summary using spacy pipeline"""
-    if not nlp:
-        return extractive_summary_lsa(doc, n_sents)
-    
-    doc = nlp(doc)
-    logger.info(f"Starting to compute summary from {len(list(doc.sents))} sentences ...")
-    words = get_significant_words_list(doc)
-    freq_word = get_frequency_words(words)
-    sent_strength = get_sent_strength(doc, freq_word)
-
-    summaries = get_extractive_summary(sent_strength, n_sents=n_sents)
-    if not summaries:
-        return extractive_summary_lsa(doc.text, n_sents)
-    
-    start_sentence = list(doc.sents)[0].text
-    total_summary = ' '.join(summaries)
-    if start_sentence in summaries:
-        return total_summary
-    return start_sentence + ' ' + total_summary
+def extractive_summary_pipeline(text: str, n_sents: int = 5) -> str:
+    """Generate extractive summary using simplified pipeline"""
+    # Always use LSA for now since spaCy is disabled
+    return extractive_summary_lsa(text, n_sents)
 
 
 def extractive_summary_lsa(text: str, n_sents: int = 5) -> str:
@@ -155,45 +144,28 @@ def extractive_summary_lsa(text: str, n_sents: int = 5) -> str:
 
 def get_nest_sentences(document: str, tokenizer: AutoTokenizer, token_max_length: int = 1024) -> List[str]:
     """Split document into chunks with maximum token length"""
-    if not nlp:
-        # Simple sentence splitting fallback
-        sentences = document.split('.')
-        chunks = []
-        current_chunk = ""
-        
-        for sentence in sentences:
-            test_chunk = current_chunk + sentence + "."
-            tokens = tokenizer(test_chunk, truncation=False, padding=False)['input_ids']
-            
-            if len(tokens) <= token_max_length:
-                current_chunk = test_chunk
-            else:
-                if current_chunk:
-                    chunks.append(current_chunk)
-                current_chunk = sentence + "."
-        
-        if current_chunk:
-            chunks.append(current_chunk)
-        
-        return chunks
+    # Simple sentence splitting fallback
+    sentences = document.split('.')
+    chunks = []
+    current_chunk = ""
     
-    sents = []
-    length = 0
-    doc = nlp(document)
-    s = ''
-    for sentence in doc.sents:
-        tokens_in_sentence = tokenizer(str(sentence), truncation=False, padding=False)['input_ids']
-        length += len(tokens_in_sentence)
-        if length <= token_max_length:
-            s += sentence.text
+    for sentence in sentences:
+        if not sentence.strip():
+            continue
+        test_chunk = current_chunk + sentence + "."
+        tokens = tokenizer(test_chunk, truncation=False, padding=False)['input_ids']
+        
+        if len(tokens) <= token_max_length:
+            current_chunk = test_chunk
         else:
-            sents.append(s)
-            s = sentence.text
-            length = len(tokens_in_sentence)
+            if current_chunk:
+                chunks.append(current_chunk)
+            current_chunk = sentence + "."
     
-    # Append last string
-    if s:
-        sents.append(s)
+    if current_chunk:
+        chunks.append(current_chunk)
+    
+    sents = chunks
     
     logger.info(f'Returning {len(sents)} number of chunk strings')
     return sents
