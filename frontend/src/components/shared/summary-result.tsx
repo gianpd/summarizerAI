@@ -49,7 +49,7 @@ export function SummaryResult({ summary }: SummaryResultProps) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{summary.title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{summary.title || 'Untitled'}</h2>
           <div className="flex items-center text-sm text-gray-500 space-x-4">
             <div className="flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
@@ -71,7 +71,7 @@ export function SummaryResult({ summary }: SummaryResultProps) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => copyToClipboard(summary.summary)}
+          onClick={() => copyToClipboard(summary.summary || '')}
         >
           <Copy className="h-4 w-4 mr-2" />
           Copy Summary
@@ -88,7 +88,7 @@ export function SummaryResult({ summary }: SummaryResultProps) {
         <CardContent>
           <div className="prose max-w-none">
             <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {summary.summary}
+              {summary.summary || 'No summary available'}
             </p>
           </div>
         </CardContent>

@@ -16,9 +16,9 @@ export interface SummaryCreate {
 
 export interface SummaryResponse {
   id: number
-  title: string
-  content: string
-  summary: string
+  title?: string
+  content?: string
+  summary?: string
   url?: string
   created_at: string
   updated_at: string
