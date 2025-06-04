@@ -7,12 +7,13 @@ import { SummaryHistory } from '@/components/shared/summary-history'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Brain, FileText, History } from 'lucide-react'
+import type { SummaryResponse } from '@/types'
 
 export default function HomePage() {
-  const [currentSummary, setCurrentSummary] = useState<any>(null)
+  const [currentSummary, setCurrentSummary] = useState<SummaryResponse | null>(null)
   const [refreshHistory, setRefreshHistory] = useState(0)
 
-  const handleSummaryCreated = (summary: any) => {
+  const handleSummaryCreated = (summary: SummaryResponse) => {
     setCurrentSummary(summary)
     setRefreshHistory(prev => prev + 1)
   }

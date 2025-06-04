@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Calendar, ExternalLink, Search, Trash2 } from 'lucide-react'
+import { SummaryDialog } from './summary-dialog'
 import api from '@/lib/api'
 import type { SummaryResponse } from '@/types'
 
@@ -131,13 +132,7 @@ export function SummaryHistory({ refreshTrigger, onSummarySelect }: SummaryHisto
                     </CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onSummarySelect(summary)}
-                    >
-                      View
-                    </Button>
+                    <SummaryDialog summary={summary} />
                     <Button
                       variant="outline"
                       size="sm"
