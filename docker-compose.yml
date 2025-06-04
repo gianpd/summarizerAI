@@ -1,23 +1,49 @@
 version: '3.8'
 
 services:
-  web:
-    build: ./project
-    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 5010
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: summarizerdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - ./project:/usr/src/app
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - 5010:5010
-    env_file:
-     - ./config.env
-    depends_on:
-      - web-db
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  web-db:
-    build:
-      context: ./project/db
-      dockerfile: Dockerfile
-    expose:
-      - 5432
-    env_file:
-     - ./config.env
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/summarizerdb
+      - SECRET_KEY=your-secret-key-here
+      - ENVIRONMENT=development
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "12000:12000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  postgres_data:
