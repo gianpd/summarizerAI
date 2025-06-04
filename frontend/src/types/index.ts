@@ -1,27 +1,25 @@
 export interface Summary {
   id: number
-  title: string
-  content: string
-  summary: string
-  url?: string
+  url: string
+  summary?: string
+  key_top?: string  // This is the title from backend
+  keywords?: string
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 export interface SummaryCreate {
-  title: string
-  content?: string
-  url?: string
+  url: string
 }
 
 export interface SummaryResponse {
   id: number
-  title?: string
-  content?: string
-  summary?: string
   url?: string
+  summary?: string
+  key_top?: string  // This is the title from backend
+  keywords?: string
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 export interface ApiError {

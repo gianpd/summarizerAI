@@ -49,7 +49,7 @@ export function SummaryResult({ summary }: SummaryResultProps) {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{summary.title || 'Untitled'}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{summary.key_top || 'Untitled'}</h2>
           <div className="flex items-center text-sm text-gray-500 space-x-4">
             <div className="flex items-center">
               <Calendar className="h-4 w-4 mr-1" />
@@ -94,18 +94,18 @@ export function SummaryResult({ summary }: SummaryResultProps) {
         </CardContent>
       </Card>
 
-      {summary.content && (
+      {summary.keywords && (
         <Card>
           <CardHeader>
-            <CardTitle>Original Content</CardTitle>
+            <CardTitle>Keywords</CardTitle>
             <CardDescription>
-              The original text that was summarized
+              Key terms extracted from the content
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="prose max-w-none">
-              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto">
-                {summary.content}
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {summary.keywords}
               </p>
             </div>
           </CardContent>

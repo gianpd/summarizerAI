@@ -38,7 +38,7 @@ export function SummaryHistory({ refreshTrigger, onSummarySelect }: SummaryHisto
 
   useEffect(() => {
     const filtered = summaries.filter(summary =>
-      (summary.title?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+      (summary.key_top?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (summary.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
     )
     setFilteredSummaries(filtered)
@@ -113,7 +113,7 @@ export function SummaryHistory({ refreshTrigger, onSummarySelect }: SummaryHisto
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{summary.title || 'Untitled'}</CardTitle>
+                    <CardTitle className="text-lg">{summary.key_top || 'Untitled'}</CardTitle>
                     <CardDescription className="flex items-center mt-1">
                       <Calendar className="h-4 w-4 mr-1" />
                       {new Date(summary.created_at).toLocaleDateString()}
