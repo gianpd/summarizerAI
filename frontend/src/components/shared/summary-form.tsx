@@ -16,12 +16,10 @@ import type { SummaryCreate, SummaryResponse } from '@/types'
 
 const urlSchema = z.object({
   url: z.string().url('Please enter a valid URL'),
-  title: z.string().min(1, 'Title is required'),
 })
 
 const textSchema = z.object({
-  content: z.string().min(10, 'Content must be at least 10 characters'),
-  title: z.string().min(1, 'Title is required'),
+  text: z.string().min(10, 'Content must be at least 10 characters'),
 })
 
 type UrlFormData = z.infer<typeof urlSchema>
@@ -39,15 +37,13 @@ export function SummaryForm({ onSummaryCreated }: SummaryFormProps) {
     resolver: zodResolver(urlSchema),
     defaultValues: {
       url: '',
-      title: '',
     },
   })
 
   const textForm = useForm<TextFormData>({
     resolver: zodResolver(textSchema),
     defaultValues: {
-      content: '',
-      title: '',
+      text: '',
     },
   })
 
@@ -55,7 +51,6 @@ export function SummaryForm({ onSummaryCreated }: SummaryFormProps) {
     setIsLoading(true)
     try {
       const payload: SummaryCreate = {
-        title: data.title,
         url: data.url,
       }
       const response = await api.post<SummaryResponse>('/api/v1/summaries/', payload)
@@ -72,12 +67,19 @@ export function SummaryForm({ onSummaryCreated }: SummaryFormProps) {
   const onTextSubmit = async (data: TextFormData) => {
     setIsLoading(true)
     try {
-      const payload: SummaryCreate = {
-        title: data.title,
-        content: data.content,
+      const payload = {
+        text: data.text,
       }
-      const response = await api.post<SummaryResponse>('/api/v1/summaries/', payload)
-      onSummaryCreated(response.data)
+      const response = await api.post('/api/v1/summaries/text', payload)
+      // Convert text summary response to match SummaryResponse format
+      const summaryResponse: SummaryResponse = {
+        id: Date.now(), // Temporary ID since text summaries aren't stored
+        summary: response.data.summary,
+        key_top: 'Text Summary',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+      onSummaryCreated(summaryResponse)
       textForm.reset()
     } catch (error: any) {
       console.error('Error creating summary:', error)
@@ -104,20 +106,6 @@ export function SummaryForm({ onSummaryCreated }: SummaryFormProps) {
         <Card>
           <CardContent className="pt-6">
             <form onSubmit={urlForm.handleSubmit(onUrlSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="url-title">Title</Label>
-                <Input
-                  id="url-title"
-                  placeholder="Enter a title for your summary"
-                  {...urlForm.register('title')}
-                />
-                {urlForm.formState.errors.title && (
-                  <p className="text-sm text-red-500">
-                    {urlForm.formState.errors.title.message}
-                  </p>
-                )}
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="url">URL</Label>
                 <Input
@@ -153,30 +141,16 @@ export function SummaryForm({ onSummaryCreated }: SummaryFormProps) {
           <CardContent className="pt-6">
             <form onSubmit={textForm.handleSubmit(onTextSubmit)} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="text-title">Title</Label>
-                <Input
-                  id="text-title"
-                  placeholder="Enter a title for your summary"
-                  {...textForm.register('title')}
-                />
-                {textForm.formState.errors.title && (
-                  <p className="text-sm text-red-500">
-                    {textForm.formState.errors.title.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content">Text Content</Label>
+                <Label htmlFor="text">Text Content</Label>
                 <Textarea
-                  id="content"
+                  id="text"
                   placeholder="Paste your text content here..."
                   className="min-h-[200px]"
-                  {...textForm.register('content')}
+                  {...textForm.register('text')}
                 />
-                {textForm.formState.errors.content && (
+                {textForm.formState.errors.text && (
                   <p className="text-sm text-red-500">
-                    {textForm.formState.errors.content.message}
+                    {textForm.formState.errors.text.message}
                   </p>
                 )}
               </div>

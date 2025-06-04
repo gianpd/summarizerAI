@@ -15,8 +15,8 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://localhost:12000",
         "http://localhost:12001",
-        "https://work-1-nddcgiroczfpnzeg.prod-runtime.all-hands.dev",
-        "https://work-2-nddcgiroczfpnzeg.prod-runtime.all-hands.dev"
+        "https://work-1-akhmacjqfeabtotb.prod-runtime.all-hands.dev",
+        "https://work-2-akhmacjqfeabtotb.prod-runtime.all-hands.dev"
     ]
     
     # External APIs
