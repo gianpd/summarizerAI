@@ -101,7 +101,7 @@ export function SummaryHistory({ refreshTrigger, onSummarySelect }: SummaryHisto
             {searchTerm ? 'No matching summaries' : 'No summaries yet'}
           </h3>
           <p className="text-gray-500">
-            {searchTerm 
+            {searchTerm
               ? 'Try adjusting your search terms.'
               : 'Create your first summary to get started.'
             }

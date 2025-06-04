@@ -84,7 +84,7 @@ export default function HomePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <SummaryHistory 
+                <SummaryHistory
                   refreshTrigger={refreshHistory}
                   onSummarySelect={setCurrentSummary}
                 />
